@@ -1,7 +1,7 @@
-   ---
-   title: "Hate speech analysis with DeepSeek"
-   date: 2026-04-21
-   ---
+---
+title: "Hate speech analysis with DeepSeek"
+date: 2026-04-21
+---
 
 ## Hate speech analysis with DeepSeek
 
