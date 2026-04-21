@@ -102,6 +102,7 @@ Coming back to the alternative prompts tested, as it can be seen in the [noteboo
 With the prompt 2:
 
 <p float="left">
+  <img src="/_assets/images/2026-04-21-deepseek1.5-prompt2.png" width="48%" />
   <img src="/_assets/images/2026-04-21-deepseek8-prompt2.png" width="48%" />
 </p>
 
@@ -113,6 +114,7 @@ Deepseek 8b — Precision: 0.4149 | Recall: 0.9581 | F1: 0.5791
 With the prompt 3:
 
 <p float="left">
+  <img src="/_assets/images/2026-04-21-deepseek1.5-prompt3.png" width="48%" />
   <img src="/_assets/images/2026-04-21-deepseek8-prompt3.png" width="48%" />
 </p>
 
