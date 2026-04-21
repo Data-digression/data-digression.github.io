@@ -24,6 +24,9 @@ rss: rss
 
 future: true
 
+include:
+  - _assets
+
 kramdown:
   syntax_highlighter_opts:
     disable: true
