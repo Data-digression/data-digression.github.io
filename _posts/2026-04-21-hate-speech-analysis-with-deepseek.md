@@ -24,7 +24,7 @@ The definition is relatively vague, and can be subject to the interpretation of 
 
 Other researchers have pointed out the particular inconsistencies of LLMs when thrown to this task[^1]. 
 
-Without deep diving in a full state-of-the-art analysis (not intended by this humble blog post), I came accross an interesting study[^2] which publishes an interesting dataset which was referenced in previous issues[^3][^4]. The dataset contains 39565 comments annotated by 7912 annotators, and automated classifications of messages that can be considered hate speech.
+Without deep diving in a full state-of-the-art analysis (not intended by this humble blog post), I came accross an interesting study by UC Berkeley DLAB's [^2] which publishes an interesting dataset which was referenced in previous articles by Kennedy, C. J., Bacon, G., Sahn, A., & von Vacano, C. (2020)[^3] and Pratik Sachdeva, Renata Barreto, Geoff Bacon, Alexander Sahn, Claudia von Vacano, and Chris Kennedy (2022)[^4]. The dataset contains 39565 comments annotated by 7912 annotators, and automated classifications of messages that can be considered hate speech.
 
 
 
@@ -36,9 +36,9 @@ One of the main focuses of this test was to proof if a local instance of an open
 
 I tested the scripts with my desktop GPU which has 12GB of VRAM. This allowed me running deepseek-r1 up to the 14b model. For practical reasons (such as inference time) I ended up using the 8b and 1.5b models. The 1.5b would be extremely optimal. It can even run on a [Raspberry Pi](https://dev.to/jeremycmorgan/running-deepseek-r1-locally-on-a-raspberry-pi-1gh8) and other cheap hardware that would be awesome for researching on a home lab. More on the results with that later.
 
-I went with a vast.ai instance with 12GB graphics card for the 135,556 combined annotated messages. The only reason for using a cloud service was not to have a desktop computer burning for three weeks.
+I went with a vast.ai instance with 12GB graphics card for the 135,556 combined annotated messages, realizing later that the predicted value on the messages was the same regardless the different annotators, and that I had to single out the unique 39565 messages.
 
-In all cases the models where run in a local ollama instance.
+In all cases the models where run in an Ollama instance.
 
 #### The test(s)
 
@@ -85,28 +85,60 @@ Here the confusion matrixes:
 And the numbers behind this:
 
 ```console
-Deepseek 1.5b — Precision: 0.5053 | Recall: 0.3554 | F1: 0.4173
-Deepseek 8b — Precision: 0.5221 | Recall: 0.9668 | F1: 0.6781
+Deepseek 1.5b — Precision: 0.3412 | Recall: 0.2886 | F1: 0.3127
+Deepseek 8b — Precision: 0.3893 | Recall: 0.9091 | F1: 0.5452
 ```
 
-A quick glimpse to the confusion matrixes are informative enough, and the numbers don't lie. The 1.5b model failed to provide relevant results, so I will focus on the 8b one. For some reason I didn't dig into, the 1.5b model also failed to evaluate many of the messages (hence the n=111272).
-According to the results, DeepSeek-R1 8b (with the aforementioned prompt) did identify many more messages that were considered hate speech than the manual annotators, creating a vast amount of false positives. Therefore the precision is really low (0.5221). The high sensitivity of DeepSeek-R1 8b (0.9668) can be explained because it was able to detect almost all the relevant hate speech messages. However, it did retrieve many that the original dataset predictions did not find hateful enough.
+A quick glimpse to the confusion matrixes are informative enough, and the numbers don't lie. The 1.5b model failed to provide relevant results, so I will focus on the 8b one. For some reason I didn't dig into, the 1.5b model also failed to evaluate many of the messages (hence the n=32768).
+According to the results, DeepSeek-R1 8b (with the aforementioned prompt) did identify many more messages that were considered hate speech than the UC Berkeley model, creating a vast amount of false positives. Therefore the precision is really low (0.3893). The high sensitivity of DeepSeek-R1 8b (0.9091) can be explained because it was able to detect the majority of the relevant hate speech messages. However, it did retrieve many that the original dataset predictions did not find hateful enough.
 
-The last point is interesting. I had the patience to evaluate some of the messages behind the scenes that were catalogued as [false positives](https://github.com/Data-digression/deepseek-hate-speech-analysis/blob/main/false_positives_deepseek8b.csv) in this test. The false positive file contains the message_id, the actual message, the scoring predicted on the original dataset and the results after evaluating the prompt by DeepSeek-R1 in 1.5b and 8b. It also contains the explanation on "why was this considered hate speech on the LLM evaluation". I did not look at the all the false positives listed on this file, but many of them are absolute examples of hate speech messages *according to the criteria used on this exercise*. 
+The last point is interesting. I had the patience to evaluate some of the messages behind the scenes that were catalogued as [false positives](https://github.com/Data-digression/deepseek-hate-speech-analysis/blob/main/false_positives_deepseek8b.csv) in this test. The false positive file contains the message_id, the actual message, the scoring predicted on the original dataset and the results after evaluating the prompt by DeepSeek-R1 in 1.5b and 8b. It also contains the explanation on "why was this considered hate speech on the LLM evaluation". I did not look at the all the false positives listed on this file, but many of them are examples of hate speech messages *according to the criteria used on this exercise*. 
 
 And hence the major issue I found on this topic. What is hate speech?
 
 
 Coming back to the alternative prompts tested, as it can be seen in the [notebook](https://github.com/Data-digression/deepseek-hate-speech-analysis/blob/main/testing-deepseek-hate-speech.ipynb), they didn't bring significative changes, although, the least specific the prompt is, the more similar to the original dataset predictions we appear to get (lowering the amount of false positives). However, those prompts have not been tested thoroughly enough to validate this as a definitive conclusion.
 
+With the prompt 2:
+
+<p float="left">
+  <img src="/_assets/images/2026-04-21-deepseek8-prompt2.png" width="48%" />
+</p>
+
+```console
+Deepseek 1.5b — Precision: 0.3677 | Recall: 0.3664 | F1: 0.3670
+Deepseek 8b — Precision: 0.4149 | Recall: 0.9581 | F1: 0.5791
+```
+
+With the prompt 3:
+
+<p float="left">
+  <img src="/_assets/images/2026-04-21-deepseek8-prompt3.png" width="48%" />
+</p>
+
+```console
+Deepseek 1.5b — Precision: 0.3398 | Recall: 0.3405 | F1: 0.3401
+Deepseek 8b — Precision: 0.4484 | Recall: 0.9149 | F1: 0.6019
+```
 
 ### Conclusions
 
-A positive remark on DeepSeek-R1 with our prompt after evaluating the results is that we can state that it doesn't suffer from false negatives. The sensitivity is high, retrieving a very high proportion of the relevant messages.
+A positive remark on DeepSeek-R1 with our prompt after evaluating the results is that we can state that it doesn't suffer from false negatives. The sensitivity is high, retrieving a high proportion of the relevant messages.
 
 The downside is that the precision is very low. The reason for this being that it triggers a lot of false positives. 
 
 After an analysis on the false positives in the [file](https://github.com/Data-digression/deepseek-hate-speech-analysis/blob/main/false_positives_deepseek8b.csv) I'd say that alternative datasets shall be explored before drawing further conclusions.
+
+Another big elephant in the room is the possibility of using larger models than the DeepSeek-R1 8b. One of the goals was using models that can run on "commodity" hardware. But it seems logic that a more capable setup would outperform the smaller ones.
+
+A relevant point where I fully agree with the UC Berkeley DLAB researchers is not to limit the evaluations with a "True" or "False" categorical classes when evaluating hate speech, but instead having a continuous variable for the prediction. This allows adjusting the thresholds of a potential hate speech recognition system on social media, for instance.
+
+
+#### Future lines of work
+
+- Testing alternative prompts.
+- Using larger models (even SaaS provided ones) to verify the possibility of  better performance with them.
+- Exploring alternative manually or ML labelled datasets to verify the results.
 
 
 ### References
@@ -118,9 +150,3 @@ After an analysis on the false positives in the [file](https://github.com/Data-d
 [^3]: Kennedy, C. J., Bacon, G., Sahn, A., & von Vacano, C. (2020). Constructing interval variables via faceted Rasch measurement and multitask deep learning: a hate speech application. arXiv preprint arXiv:2009.10277.
 
 [^4]: Pratik Sachdeva, Renata Barreto, Geoff Bacon, Alexander Sahn, Claudia von Vacano, and Chris Kennedy. 2022. The Measuring Hate Speech Corpus: Leveraging Rasch Measurement Theory for Data Perspectivism. In Proceedings of the 1st Workshop on Perspectivist Approaches to NLP @LREC2022, pages 83–94, Marseille, France. European Language Resources Association.
-
-
-
-https://github.com/sridhama/llm-offensive-language-detection?tab=readme-ov-file
-https://peerj.com/articles/cs-2911/
-https://www.sciencedirect.com/science/article/pii/S1877050925016461
